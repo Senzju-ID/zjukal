@@ -7,7 +7,7 @@ interface CardPostProps {
 
 const CardPost = ({title, description, imgPath }: CardPostProps) => {
     return (
-        <div className="flex flex-col w-80 h-96 bg-gray-200 rounded-lg shadow-md p-4">
+        <div className="flex flex-col w-40 h-15 bg-blue-400/100 rounded-lg shadow-md p-4">
             <h1>{title}</h1>
         </div>
     )
