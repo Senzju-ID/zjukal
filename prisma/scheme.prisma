@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Thread {
+  id           String      @id @default(uuid())
+  title        String
+  description  String
+  mediaUrl     String?
+  mediaType    String?
+  authorToken  String
+  createdAt    DateTime    @default(now())
+  
+  comments     Comment[]
+  likes        Like[]
+}
+
+model Comment {
+  id           String      @id @default(uuid())
+  threadId     String?
+  thread       Thread?     @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  context      String      
+  authorToken  String
+  createdAt    DateTime    @default(now())
+
+  likes        Like[]
+}
+
+model Like {
+  id           String      @id @default(uuid())
+  threadId     String?
+  thread       Thread?     @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  commentId    String?
+  comment      Comment?    @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  guestToken   String
+
+  @@unique([threadId, guestToken])
+  @@unique([commentId, guestToken])
+}

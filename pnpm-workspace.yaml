@@ -1,3 +1,9 @@
 allowBuilds:
-  esbuild: set this to true or false
-  sqlite3: false
+  esbuild: true
+  '@prisma/engines': true
+  prisma: true
+  sqlite3: true
+  better-sqlite3: true
+
+skills:
+  dirs: []
