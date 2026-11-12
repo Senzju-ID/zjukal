@@ -1,16 +1,26 @@
-"use client"
+import type { ButtonHTMLAttributes } from "react";
 
-interface ButtonProps {
-    children: React.ReactNode;
-    onClick?: () => void;
+interface ButtonToggleProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  onToggle?: () => void;
 }
 
-const Button = ({ children, onClick }: ButtonProps) => {
-    return (
-        <button onClick={onClick}>
-            {children}
-        </button>
-    );
+const Button = ({
+  className,
+  onToggle,
+  children,
+  type = "button",
+  ...props
+}: ButtonToggleProps) => {
+  return (
+    <button
+      type={type}
+      onClick={onToggle}
+      className={`cursor-pointer ${className} `}
+      {...props}
+    >
+      {children}
+    </button>
+  );
 };
 
 export default Button;
