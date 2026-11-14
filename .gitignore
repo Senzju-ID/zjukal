@@ -41,8 +41,13 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# database 
+# Database SQLite
 *.db
-*.db-journal
-*.sqlite
-*.sqlite3
+*.db-shm
+*.db-wal
+prisma/*.db
+prisma/*.db-*
+
+# Uploads folder
+public/uploads/*
+!public/uploads/.gitkeep
