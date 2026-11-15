@@ -8,10 +8,17 @@
 - Styling: Tailwind CSS v4 (@theme, CSS variables).
 - Theme: `next-themes` (ThemeProvider, ThemeSwitch in `src/components/ui/ThemeSwitch.tsx`).
 - ORM/Database: Prisma 7 with SQLite (`@prisma/adapter-better-sqlite3`).
-- File Upload: Local storage (`public/upload/`, valid types: png, jpg, jpeg, mp4, webm).
-- State / Auth: Anonymous `guestToken` stored in `localStorage`.
+- File Upload: Local storage (`public/uploads/`, valid types: png, jpg, jpeg, mp4, webm). Ignore contents in `.gitignore` except `.gitkeep`.
+- State / Auth: Anonymous `guestToken` stored in HTTP-only Cookie, generated via `src/proxy.ts` (`src/middleware.ts`) and accessed via `getGuestToken()` in `src/lib/guestUser.ts`.
+- API Client Layer: Native `fetch` wrapper in `src/lib/api.ts` (automatically sends cookies).
+
+## Database & Indexing Rules
+- `Thread`: ID string (UUID). Contains atomic counters `commentsCount` and `likesCount`. Indexed by `createdAt` (`@@index([createdAt])`).
+- `Comment`: ID integer (`autoincrement`). Relates to `threadId` (`onDelete: Cascade`), contains `likesCount`. Indexed by `threadId` (`@@index([threadId])`).
+- `Like`: ID integer (`autoincrement`). Foreign keys `threadId` and `commentId` (`onDelete: Cascade`). Composite unique constraints: `@@unique([threadId, authorToken])` and `@@unique([commentId, authorToken])`.
 
 ## Coding Rules
-- Gunakan stdlib / native fitur pertama.
+- Gunakan stdlib / native fitur pertama (`fetch` native, tanpa Axios).
 - Kode minimal, kering, YAGNI, hindari over-engineering.
 - Validasi input di trust boundaries.
+

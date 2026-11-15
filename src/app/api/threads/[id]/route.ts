@@ -20,7 +20,10 @@ export async function PATCH(request: Request, { params }: {params:  Promise<{ id
       data: updateData,
     })
 
-    return Response.json({...updateThread, message: "Successfully changed "}, {status: 200})
+    return Response.json(
+      { thread: updateThread, message: "Successfully changed" },
+      { status: 200 }
+    );
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
       return Response.json({error: "Thread not found"}, {status: 404 })
@@ -56,7 +59,7 @@ export async function DELETE(request: Request, { params }: {params:  Promise<{ i
     }
   )
 
-    return Response.json({ message:  "Successfully deleted thread "}, { status: 200 })
+    return Response.json({ message: "Successfully deleted thread "}, { status: 200 })
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
       return Response.json({ error: "Thread not found" }, { status: 404 });

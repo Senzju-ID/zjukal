@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { getGuestToken } from "@/lib/userToken";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -6,13 +7,8 @@ export async function GET() {
   try {
     const threads = await prisma.thread.findMany({
       orderBy: { createdAt: "desc" },
-      include: {
-        _count: { 
-          select: { comments: true, likes: true } 
-        },
-      },
     });
-    return Response.json(threads);
+    return Response.json(threads, {status: 200});
   } catch (err) {
     return Response.json({err, error: "Failed to fetch threads" }, { status: 500 });
   }
@@ -23,7 +19,7 @@ export async function POST(request: Request) {
     const formData = await request.formData();
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
-    const authorToken = formData.get("authorToken") as string;
+    const authorToken = await getGuestToken()
     const file = formData.get("file") as File | null;
 
     if (!title || !description || !authorToken) {

@@ -7,37 +7,44 @@ datasource db {
 }
 
 model Thread {
-  id           String      @id @default(uuid())
-  title        String
-  description  String
-  mediaUrl     String?
-  mediaType    String?
-  authorToken  String
-  createdAt    DateTime    @default(now())
+  id            String      @id @default(uuid())
+  title         String
+  description   String
+  mediaUrl      String?
+  mediaType     String?
+  authorToken   String
+  createdAt     DateTime    @default(now())
+  commentsCount Int        @default(0)
+  likesCount    Int        @default(0)
   
   comments     Comment[]
   likes        Like[]
+
+  @@index([createdAt])
 }
 
 model Comment {
-  id           String      @id @default(uuid())
+  id           Int         @id @default(autoincrement())
   threadId     String?
   thread       Thread?     @relation(fields: [threadId], references: [id], onDelete: Cascade)
   context      String      
   authorToken  String
   createdAt    DateTime    @default(now())
+  likesCount   Int         @default(0)
 
   likes        Like[]
+
+  @@index([threadId])
 }
 
 model Like {
-  id           String      @id @default(uuid())
+  id           Int         @id @default(autoincrement())
   threadId     String?
   thread       Thread?     @relation(fields: [threadId], references: [id], onDelete: Cascade)
-  commentId    String?
+  commentId    Int?
   comment      Comment?    @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  guestToken   String
+  authorToken   String
 
-  @@unique([threadId, guestToken])
-  @@unique([commentId, guestToken])
+  @@unique([threadId, authorToken])
+  @@unique([commentId, authorToken])
 }
