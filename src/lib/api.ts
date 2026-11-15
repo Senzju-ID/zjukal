@@ -60,6 +60,16 @@ export const toggleLikeThread = async (threadId: string) => {
   return handlerResponse(res);
 };
 
+// Bagian toggle dislike thread pakai toggleDislikeThread()
+// catatan
+// hanya perlu threadId
+export const toggleDislikeThread = async (threadId: string) => {
+  const res = await fetch(`${API_URL_THREADS}/${threadId}/dislikes`, {
+    method: "POST",
+  });
+  return handlerResponse(res);
+};
+
 // Ambil semua komentar di suatu thread pakai fetchComments()
 // Catatan 
 // hanya perlu threadId

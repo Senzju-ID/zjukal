@@ -14,11 +14,13 @@ model Thread {
   mediaType     String?
   authorToken   String
   createdAt     DateTime    @default(now())
-  commentsCount Int        @default(0)
-  likesCount    Int        @default(0)
+  commentsCount Int         @default(0)
+  likesCount    Int         @default(0)
+  dislikesCount Int         @default(0)
   
   comments     Comment[]
   likes        Like[]
+  dislikes     Dislike[]
 
   @@index([createdAt])
 }
@@ -43,8 +45,17 @@ model Like {
   thread       Thread?     @relation(fields: [threadId], references: [id], onDelete: Cascade)
   commentId    Int?
   comment      Comment?    @relation(fields: [commentId], references: [id], onDelete: Cascade)
-  authorToken   String
+  authorToken  String
 
   @@unique([threadId, authorToken])
   @@unique([commentId, authorToken])
+}
+
+model Dislike {
+  id           Int         @id @default(autoincrement())
+  threadId     String?
+  thread       Thread?     @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  authorToken  String
+
+  @@unique([threadId, authorToken])
 }

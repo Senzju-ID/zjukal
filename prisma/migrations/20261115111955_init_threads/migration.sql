@@ -8,7 +8,8 @@ CREATE TABLE "Thread" (
     "authorToken" TEXT NOT NULL,
     "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "commentsCount" INTEGER NOT NULL DEFAULT 0,
-    "likesCount" INTEGER NOT NULL DEFAULT 0
+    "likesCount" INTEGER NOT NULL DEFAULT 0,
+    "dislikesCount" INTEGER NOT NULL DEFAULT 0
 );
 
 -- CreateTable
@@ -32,6 +33,14 @@ CREATE TABLE "Like" (
     CONSTRAINT "Like_commentId_fkey" FOREIGN KEY ("commentId") REFERENCES "Comment" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+-- CreateTable
+CREATE TABLE "Dislike" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "threadId" TEXT,
+    "authorToken" TEXT NOT NULL,
+    CONSTRAINT "Dislike_threadId_fkey" FOREIGN KEY ("threadId") REFERENCES "Thread" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 -- CreateIndex
 CREATE INDEX "Thread_createdAt_idx" ON "Thread"("createdAt");
 
@@ -43,3 +52,6 @@ CREATE UNIQUE INDEX "Like_threadId_authorToken_key" ON "Like"("threadId", "autho
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Like_commentId_authorToken_key" ON "Like"("commentId", "authorToken");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Dislike_threadId_authorToken_key" ON "Dislike"("threadId", "authorToken");
