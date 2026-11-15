@@ -7,13 +7,14 @@
   --vault-surface: #161a23;
   --vault-text-primary: #e5e7eb;
   --vault-text-secondary: #9ca3af;
-  --vault-accent: #10b981;
+  --vault-accent: #5186d4;
+  --vault-accent-hover: #4ecc80;
 
   /* Small UI elements */
   --vault-ui: #202530;
   --vault-ui-border: #343b49;
 }
-
+ 
 @theme inline {
   --color-primary: var(--vault-bg);
   --color-surface: var(--vault-surface);
@@ -22,6 +23,7 @@
   --text-color-primary: var(--vault-text-primary);
   --text-color-secondary: var(--vault-text-secondary);
   --color-accent: var(--vault-accent);
+  --color-accent-hover: var(--vault-accent-hover);
 }
 
 .light {
@@ -41,9 +43,15 @@
     background-color: var(--color-primary);
     color: var(--text-color-primary);
     font-family: Arial, Helvetica, sans-serif;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
     transition:
       background-color 0.4s ease,
       color 0.4s ease;
+  }
+
+  body::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
   }
 
   *,
