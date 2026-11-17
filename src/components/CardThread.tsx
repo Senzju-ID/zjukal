@@ -1,7 +1,8 @@
 'use client';
 
-import { ThumbsUp, ThumbsDown, MessageSquare } from 'lucide-react';
-import { toggleLikeThread, toggleDislikeThread } from '@/lib/api';
+import Image from 'next/image';
+import { ThumbsUp, ThumbsDown, MessageSquare, Trash2 } from 'lucide-react';
+import { toggleLikeThread, toggleDislikeThread, deleteThread } from '@/lib/api';
 import { useState } from 'react';
 import CommentThread from './CommentThread';
 
@@ -13,6 +14,7 @@ interface CardThreadProps {
     likesCount?: number;
     dislikesCount?: number;
     commentsCount?: number;
+    onDelete?: (id: string) => void;
 }
 
 const CardThread = ({ 
@@ -22,12 +24,14 @@ const CardThread = ({
     imgPath, 
     likesCount: initialLikes = 0, 
     dislikesCount: initialDislikes = 0, 
-    commentsCount = 0 
+    commentsCount = 0,
+    onDelete
 }: CardThreadProps) => {
     const [likes, setLikes] = useState(initialLikes);
     const [dislikes, setDislikes] = useState(initialDislikes);
     const [isLoading, setIsLoading] = useState(false);
     const [isCommentOpen, setIsCommentOpen] = useState(false);
+    const [imageLoaded, setImageLoaded] = useState(false);
 
     const handleAction = async (action: 'like' | 'dislike', e: React.MouseEvent) => {
         e.stopPropagation();
@@ -50,6 +54,22 @@ const CardThread = ({
         }
     };
 
+    const handleDelete = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (isLoading || !id) return;
+        if (!confirm('Are you sure you want to delete this thread?')) return;
+
+        setIsLoading(true);
+        try {
+            await deleteThread(id);
+            if (onDelete) onDelete(id);
+        } catch (error) {
+            console.error('Delete thread failed:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     return (
         <>
             <div 
@@ -67,11 +87,15 @@ const CardThread = ({
                 )}
 
                 {imgPath && (
-                    <div className="overflow-hidden rounded-xl mt-4">
-                        <img 
+                    <div className={`rounded-xl mt-4 relative w-full border border-ui-border ${!imageLoaded ? 'animate-pulse bg-ui/20 min-h-50' : ''}`}>
+                        <Image 
                             src={imgPath} 
                             alt={title} 
-                            className="w-full h-48 object-cover"
+                            width={1000}
+                            height={1000}
+                            className={`w-full h-auto object-contain rounded-xl transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                            onLoad={() => setImageLoaded(true)}
+                            unoptimized
                         />
                     </div>
                 )}
@@ -99,6 +123,15 @@ const CardThread = ({
                         <MessageSquare className="w-4 h-4" />
                         <span className="text-xs font-medium">{commentsCount}</span>
                     </div>
+
+                    <button 
+                        onClick={handleDelete}
+                        disabled={isLoading}
+                        className="ml-auto flex items-center gap-1.5 text-color-secondary hover:text-red-500 disabled:opacity-50 transition-colors cursor-pointer bg-transparent border-none p-0"
+                        title="Delete Thread"
+                    >
+                        <Trash2 className="w-4 h-4" />
+                    </button>
                 </div>
             </div>
 
