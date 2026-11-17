@@ -1,12 +1,22 @@
 import { prisma } from "@/lib/prisma";
-import { getGuestToken } from "@/lib/userToken";
-import fs from "node:fs/promises";
-import path from "node:path";
+import { getOrCreateAnonymousUser } from "@/lib/userToken";
+import { uploadToNeonStorage } from "@/lib/neonStorage";
 
 export async function GET() {
   try {
     const threads = await prisma.thread.findMany({
       orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        mediaUrl: true,
+        mediaType: true,
+        createdAt: true,
+        commentsCount: true,
+        likesCount: true,
+        dislikesCount: true,
+      }
     });
     return Response.json(threads, {status: 200});
   } catch (err) {
@@ -16,13 +26,14 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const user = await getOrCreateAnonymousUser();
+
     const formData = await request.formData();
     const title = formData.get("title") as string;
     const description = formData.get("description") as string;
-    const authorToken = await getGuestToken()
     const file = formData.get("file") as File | null;
 
-    if (!title || !description || !authorToken) {
+    if (!title || !description) {
       return Response.json(
         { error: "Title, description, and authorToken are required " },
         { status: 400 },
@@ -31,7 +42,6 @@ export async function POST(request: Request) {
 
     let mediaUrl: string | null = null;
     let mediaType: string | null = null;
-    let message: string | null = null;
     let messageFile = ""
 
     if (file && file.size > 0) {
@@ -56,22 +66,34 @@ export async function POST(request: Request) {
       const buffer = Buffer.from(bytes);
 
       const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-      const uploadDir = path.join(process.cwd(), "public", "uploads");
+      const storageKey = `uploads/${fileName}`;
 
-      await fs.mkdir(uploadDir, { recursive: true });
-      await fs.writeFile(path.join(uploadDir, fileName), buffer);
+      const uploadResult = await uploadToNeonStorage({
+        key: storageKey,
+        body: buffer,
+        contentType: mime,
+      });
 
-      mediaUrl = `/uploads/${fileName}`;
+      mediaUrl = uploadResult.url;
       messageFile = " and the image or video success upload";
     }
 
     const newThread = await prisma.thread.create({
-      data: { title, description, authorToken, mediaUrl, mediaType },
+      data: { title, description, anonymousUserId: user.id, mediaUrl, mediaType },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        mediaUrl: true,
+        mediaType: true,
+        createdAt: true,
+        commentsCount: true,
+        likesCount: true,
+        dislikesCount: true,
+      }
     });
 
-    message = `Thread success create${messageFile}`
-
-    return Response.json({ ...newThread, message: message }, { status: 201 });
+    return Response.json({ ...newThread, message: `Thread success create${messageFile}` }, { status: 201 });
   } catch (err) {
     return Response.json({err, error: "Failed create thread" }, { status: 500 });
   }

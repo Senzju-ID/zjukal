@@ -1,35 +1,58 @@
-import { prisma } from "@/lib/prisma"
-import { Prisma } from "@prisma/client"
+import { prisma } from "@/lib/prisma";
+import { getOrCreateAnonymousUser } from "@/lib/userToken";
 
-
-export async function DELETE(request: Request, 
-    { params }: { params: Promise<{ id: string , commentId: string}>}
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string; commentId: string }> },
 ) {
-    try {
-        const { id , commentId } = await params;
-        const commentIdNum = Number(commentId);
+  try {
+    const { id, commentId } = await params;
+    const threadIdNum = Number(id);
+    const commentIdNum = Number(commentId);
 
-        if (isNaN(commentIdNum)) {
-            return Response.json({error: "Invalid comment ID"}, {status: 400 });
-        }
-
-        await prisma.$transaction([
-            prisma.comment.delete({
-                where: {id: commentIdNum},
-            }),
-            prisma.thread.update({
-                where: { id },
-                data: {
-                    commentsCount: { decrement: 1 }
-                }
-            })
-        ])
-        
-        return Response.json({ message: "Successfully deleted comment" }, {status: 200})
-    } catch (err) {
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2025") {
+    if (
+      !Number.isSafeInteger(threadIdNum) ||
+      threadIdNum <= 0 ||
+      !Number.isSafeInteger(commentIdNum) ||
+      commentIdNum <= 0
+    ) {
       return Response.json({ error: "Comment not found" }, { status: 404 });
     }
-    return Response.json({err, error: "Failed to delete comment"}, { status: 500})
+
+    const user = await getOrCreateAnonymousUser();
+
+    const comment = await prisma.comment.findFirst({
+        where: {
+            id: commentIdNum,
+            threadId: threadIdNum,
+            anonymousUserId: user.id,
+        }
+    })
+
+    if (!comment) {
+        return Response.json({error: "Comment not found"}, {status: 404});
+    }
+
+    await prisma.$transaction([
+      prisma.comment.delete({
+        where: { id: commentIdNum },
+      }),
+      prisma.thread.update({
+        where: { id: threadIdNum },
+        data: {
+          commentsCount: { decrement: 1 },
+        },
+      }),
+    ]);
+
+    return Response.json(
+      { message: "Successfully deleted comment" },
+      { status: 200 },
+    );
+  } catch (err) {
+    return Response.json(
+      { err, error: "Failed to delete comment" },
+      { status: 500 },
+    );
   }
 }

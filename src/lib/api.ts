@@ -31,7 +31,7 @@ export const createThread = async (formData: FormData) => {
 // Catatan 
 // hanya perlu threadId
 // cuman edit title dan description untuk file tidak bisa diubah atau dihapus
-export const editThread = async (threadId: string, formData: FormData) => {
+export const editThread = async (threadId: number, formData: FormData) => {
     const res = await fetch(`${API_URL_THREADS}/${threadId}`, {
         method: "PATCH",
         body: formData,
@@ -42,7 +42,7 @@ export const editThread = async (threadId: string, formData: FormData) => {
 // Bagian hapus thread pakai deleteThread()
 // Catatan 
 // hanya perlu threadId
-export const deleteThread = async (threadId: string) => {
+export const deleteThread = async (threadId: number) => {
     const res = await fetch(`${API_URL_THREADS}/${threadId}`, {
         method: "DELETE"
     });
@@ -53,7 +53,7 @@ export const deleteThread = async (threadId: string) => {
 // Bagian toggle like thread pakai toggleLikeThread()
 // Catatan 
 // hanya perlu threadId
-export const toggleLikeThread = async (threadId: string) => {
+export const toggleLikeThread = async (threadId: number) => {
   const res = await fetch(`${API_URL_THREADS}/${threadId}/likes`, {
     method: "POST",
   });
@@ -63,7 +63,7 @@ export const toggleLikeThread = async (threadId: string) => {
 // Bagian toggle dislike thread pakai toggleDislikeThread()
 // catatan
 // hanya perlu threadId
-export const toggleDislikeThread = async (threadId: string) => {
+export const toggleDislikeThread = async (threadId: number) => {
   const res = await fetch(`${API_URL_THREADS}/${threadId}/dislikes`, {
     method: "POST",
   });
@@ -73,7 +73,7 @@ export const toggleDislikeThread = async (threadId: string) => {
 // Ambil semua komentar di suatu thread pakai fetchComments()
 // Catatan 
 // hanya perlu threadId
-export const fetchComments = async (threadId: string) => {
+export const fetchComments = async (threadId: number) => {
   const res = await fetch(`${API_URL_THREADS}/${threadId}/comments`);
   return handlerResponse(res);
 };
@@ -82,7 +82,7 @@ export const fetchComments = async (threadId: string) => {
 // Catatan 
 // perlu threadId 
 // formData berisi 'context'
-export const addComment = async (threadId: string, formData: FormData) => {
+export const addComment = async (threadId: number, formData: FormData) => {
   const res = await fetch(`${API_URL_THREADS}/${threadId}/comments`, {
     method: "POST",
     body: formData,
@@ -93,7 +93,7 @@ export const addComment = async (threadId: string, formData: FormData) => {
 // Hapus komentar pakai deleteComment()
 // Catatan 
 // perlu threadId dan commentId berupa number
-export const deleteComment = async (threadId: string, commentId: number) => {
+export const deleteComment = async (threadId: number, commentId: number) => {
   const res = await fetch(`${API_URL_THREADS}/${threadId}/comments/${commentId}`, {
     method: "DELETE",
   });
@@ -103,7 +103,7 @@ export const deleteComment = async (threadId: string, commentId: number) => {
 // Toggle Like Komentar pakai toggleLikeComment()
 // Catatan 
 // perlu threadId dan commentId berupa number
-export const toggleLikeComment = async (threadId: string, commentId: number) => {
+export const toggleLikeComment = async (threadId: number, commentId: number) => {
   const res = await fetch(`${API_URL_THREADS}/${threadId}/comments/${commentId}/likes`, {
     method: "POST",
   });
