@@ -16,6 +16,11 @@ export const fetchThreads = async () => {
 }
 
 // Bagian buat thread baru pakai createThread()
+export const fetchThread = async (threadId: number) => {
+  const res = await fetch(`${API_URL_THREADS}/${threadId}`)
+  return handlerResponse(res);
+}
+
 // Catatan
 // wajib title dan description 
 // opsional Image atau Video

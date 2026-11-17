@@ -8,6 +8,35 @@ const parseValidId = (idStr: string): number | null => {
   return num;
 }
 
+export async function GET(request: Request, { params }: {params:  Promise<{ id: string }>}) {
+  try {
+    const { id } = await params;
+    const threadIdNum = parseValidId(id);
+
+    if (!threadIdNum) {
+      return Response.json({ error: "Thread not found"}, { status: 404 })
+    }
+
+    const threads = await prisma.thread.findFirst({
+      where: {id: threadIdNum},
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        mediaUrl: true,
+        mediaType: true,
+        createdAt: true,
+        commentsCount: true,
+        likesCount: true,
+        dislikesCount: true,
+      }
+    });
+    return Response.json(threads, {status: 200});
+  } catch (err) {
+    return Response.json({err, error: "Failed to fetch thread" }, { status: 500 });
+  }
+}
+
 export async function PATCH(request: Request, { params }: {params:  Promise<{ id: string }>}) {
   try {
     const { id } = await params;
