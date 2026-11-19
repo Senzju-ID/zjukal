@@ -1,5 +1,5 @@
 "use client";
-import { ButtonToggle } from "@/components";
+import Button from "@/components/ui/Button";
 import { useLayoutEffect, useRef, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
@@ -39,7 +39,7 @@ const ThemeSwitch = ({
   };
 
   return (
-    <ButtonToggle
+    <Button
       type="button"
       onToggle={handleThemeChange}
       disabled={disabled}
@@ -68,7 +68,7 @@ const ThemeSwitch = ({
           className={`text-white duration-300 transition-transform`}
         />
       )}
-    </ButtonToggle>
+    </Button>
   );
 };
 

@@ -1,0 +1,95 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AnonymousUser {
+  id        String   @id @default(uuid())
+  tokenHash String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  threads   Thread[]
+  comments  Comment[]
+  likes     Like[]
+  dislikes  Dislike[]
+}
+
+model Thread {
+  id              Int           @id @default(autoincrement())
+  title           String
+  description     String
+  mediaUrl        String?
+  mediaType       String?
+
+  anonymousUserId String
+  anonymousUser   AnonymousUser @relation(fields: [anonymousUserId], references: [id], onDelete: Restrict)
+
+  createdAt       DateTime      @default(now())
+  commentsCount   Int           @default(0)
+  likesCount      Int           @default(0)
+  dislikesCount  Int           @default(0)
+
+  comments        Comment[]
+  likes           Like[]
+  dislikes        Dislike[]
+
+  @@index([createdAt])
+  @@index([anonymousUserId])
+}
+
+
+model Comment {
+  id              Int           @id @default(autoincrement())
+
+  threadId        Int
+  thread          Thread        @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  context         String
+
+  anonymousUserId String
+  anonymousUser   AnonymousUser @relation(fields: [anonymousUserId], references: [id], onDelete: Restrict)
+
+  createdAt       DateTime      @default(now())
+  likesCount      Int           @default(0)
+
+  likes           Like[]
+
+  @@index([threadId])
+  @@index([anonymousUserId])
+}
+
+
+model Like {
+  id              Int           @id @default(autoincrement())
+
+  threadId        Int?
+  thread          Thread?       @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  commentId       Int?
+  comment         Comment?      @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  anonymousUserId String
+  anonymousUser   AnonymousUser @relation(fields: [anonymousUserId], references: [id], onDelete: Restrict)
+
+  @@unique([threadId, anonymousUserId])
+  @@unique([commentId, anonymousUserId])
+  @@index([anonymousUserId])
+}
+
+model Dislike {
+  id              Int           @id @default(autoincrement())
+
+  threadId        Int?
+  thread          Thread?       @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  anonymousUserId String
+  anonymousUser   AnonymousUser @relation(fields: [anonymousUserId], references: [id], onDelete: Restrict)
+
+  @@unique([threadId, anonymousUserId])
+  @@index([anonymousUserId])
+}

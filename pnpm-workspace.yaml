@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+  '@prisma/engines': true
+  prisma: true
+
+skills:
+  dirs: []

@@ -1,26 +1,71 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant light (&:where(.light *));
 
+@theme {
+  --vault-bg: #0d0e12;
+  --vault-surface: #161a23;
+  --vault-text-primary: #e5e7eb;
+  --vault-text-secondary: #9ca3af;
+  --vault-accent: #5186d4;
+  --vault-accent-hover: #4ecc80;
+
+  /* Small UI elements */
+  --vault-ui: #202530;
+  --vault-ui-border: #343b49;
+}
+ 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-primary: var(--vault-bg);
+  --color-surface: var(--vault-surface);
+  --color-ui: var(--vault-ui);
+  --color-ui-border: var(--vault-ui-border);
+  --text-color-primary: var(--vault-text-primary);
+  --text-color-secondary: var(--vault-text-secondary);
+  --color-accent: var(--vault-accent);
+  --color-accent-hover: var(--vault-accent-hover);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+.light {
+  --vault-bg: #f3fffe;
+  --vault-surface: #ffffff;
+  --vault-text-primary: #1e2022;
+  --vault-text-secondary: #575c66;
+  --vault-accent: #5186d4;
+
+  /* Small UI elements */
+  --vault-ui: #f0f1f3;
+  --vault-ui-border: #d1d5db;
+}
+
+@layer base {
+  * {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
   }
-}
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  *::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+  }
+
+  body {
+    background-color: var(--color-primary);
+    color: var(--text-color-primary);
+    font-family: Arial, Helvetica, sans-serif;
+    transition:
+      background-color 0.4s ease,
+      color 0.4s ease;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease,
+      fill 0.3s ease,
+      stroke 0.3s ease,
+      box-shadow 0.3s ease;
+  }
 }
