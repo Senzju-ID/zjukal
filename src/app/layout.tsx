@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { ThreadProvider } from "@/context/ThreadContext";
 import "@/styles/globals.css";
 
 const geistSans = Geist({
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Passzju",
-	description: "Your secure password manager",
+	title: "Zjukal",
+	description: "Anonymous thread & media sharing",
 };
 
 export default function RootLayout({
@@ -31,7 +32,9 @@ export default function RootLayout({
 		>
 			<body className="min-h-dvh flex flex-col overflow-y-auto">
 				<ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-					{children}
+					<ThreadProvider>
+						{children}
+					</ThreadProvider>
 				</ThemeProvider>
 			</body>
 		</html>

@@ -1,13 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Image as ImageIcon, Loader2 } from 'lucide-react';
 import { createThread } from '@/lib/api';
+import { useThreads } from '@/context/ThreadContext';
 
 interface CreateThreadProps {
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: () => void;
+    onSuccess?: () => void;
 }
 
 interface ApiError {
@@ -15,6 +16,7 @@ interface ApiError {
 }
 
 const CreateThread = ({ isOpen, onClose, onSuccess }: CreateThreadProps) => {
+    const { refreshThreads } = useThreads();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [file, setFile] = useState<File | null>(null);
@@ -43,7 +45,9 @@ const CreateThread = ({ isOpen, onClose, onSuccess }: CreateThreadProps) => {
             setTitle('');
             setDescription('');
             setFile(null);
-            onSuccess();
+            
+            await refreshThreads();
+            if (onSuccess) onSuccess();
             onClose();
         } catch (err: unknown) {
             const errorObj = err as ApiError;

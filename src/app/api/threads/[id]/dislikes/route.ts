@@ -33,14 +33,7 @@ export async function POST(
           data: { dislikesCount: { decrement: 1 } },
         }),
       ]);
-
-      return Response.json(
-        { liked: false, disliked: false, message: "Undisliked thread" },
-        { status: 200 },
-      );
-    }
-
-    if (existingLike) {
+    } else if (existingLike) {
       await prisma.$transaction([
         prisma.dislike.create({ data: { threadId, anonymousUserId } }),
         prisma.like.delete({ where: { id: existingLike.id } }),
@@ -52,15 +45,6 @@ export async function POST(
           },
         }),
       ]);
-
-      return Response.json(
-        {
-          liked: false,
-          disliked: true,
-          message: "Disliked thread and Unlike thread",
-        },
-        { status: 200 },
-      );
     } else {
       await prisma.$transaction([
         prisma.dislike.create({ data: { threadId, anonymousUserId } }),
@@ -69,12 +53,23 @@ export async function POST(
           data: { dislikesCount: { increment: 1 } },
         }),
       ]);
-
-      return Response.json(
-        { liked: false, disliked: true, message: "Disliked thread" },
-        { status: 200 },
-      );
     }
+
+    const updated = await prisma.thread.findUnique({
+      where: { id: threadId },
+      select: { likesCount: true, dislikesCount: true },
+    });
+
+    return Response.json(
+      {
+        liked: false,
+        disliked: !existingDislike,
+        likesCount: updated?.likesCount ?? 0,
+        dislikesCount: updated?.dislikesCount ?? 0,
+        message: existingDislike ? "Undisliked thread" : "Disliked thread",
+      },
+      { status: 200 },
+    );
   } catch (err) {
     return Response.json(
       { err, error: "Failed to toggle dislike" },

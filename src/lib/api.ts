@@ -114,3 +114,15 @@ export const toggleLikeComment = async (threadId: number, commentId: number) => 
   });
   return handlerResponse(res);
 };
+
+// Bagian ambil siapa aku pakai fetchMe()
+export const fetchMe = async () => {
+  const res = await fetch('/api/users/me');
+  return handlerResponse(res);
+};
+
+// Bagian ambil semua thread milik sendiri pakai fetchUserThreads()
+export const fetchUserThreads = async (userId: string) => {
+  const res = await fetch(`/api/users/${userId}/threads`);
+  return handlerResponse(res);
+};
