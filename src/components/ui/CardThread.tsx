@@ -107,6 +107,7 @@ const CardThread = ({
                             <video 
                                 src={mediaUrl} 
                                 controls 
+                                preload="none"
                                 playsInline 
                                 onClick={(e) => e.stopPropagation()} 
                                 className="w-full max-h-[380px] object-contain rounded-xl bg-black"
