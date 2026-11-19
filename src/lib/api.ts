@@ -24,13 +24,24 @@ export const fetchThread = async (threadId: number) => {
 // Catatan
 // wajib title dan description 
 // opsional Image atau Video
-export const createThread = async (formData: FormData) => {
-    const res = await fetch(`${API_URL_THREADS}`, {
-        method: "POST",
-        body: formData,
-    });
-    return handlerResponse(res);
+export interface CreateThreadPayload {
+  title: string;
+  description: string;
+  mediaKey: string | null;
+  mediaType: "IMAGE" | "VIDEO" | null;
 }
+
+export const createThread = async (payload: CreateThreadPayload) => {
+  const res = await fetch(API_URL_THREADS, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  return handlerResponse(res);
+};
 
 // Bagian edit thread pakai editThread()
 // Catatan 

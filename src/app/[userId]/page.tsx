@@ -4,6 +4,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { Suspense, use } from 'react';
 import { Loader2 } from 'lucide-react';
+import CreateThread from '@/components/ui/CreateThread';
 
 async function UserProfileContent({ params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params;
