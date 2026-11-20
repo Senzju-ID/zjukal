@@ -3,8 +3,6 @@ import { randomUUID } from "node:crypto";
 import { getOrCreateAnonymousUser } from "@/lib/userToken";
 import { createPresignedUploadUrl } from "@/lib/neonStorage";
 
-export const runtime = "nodejs";
-
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 const ALLOWED_TYPES: Record<string, string[]> = {
