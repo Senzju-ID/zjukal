@@ -6,6 +6,7 @@ import {
   PutObjectCommand,
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const requiredEnv = [
   "AWS_ENDPOINT_URL_S3",
@@ -79,6 +80,36 @@ export async function uploadToNeonStorage(params: {
   return {
     key,
     url: getPublicUrl(key),
+  };
+}
+
+export async function createPresignedUploadUrl(params: {
+  key: string;
+  contentType: string;
+}) {
+  const { key, contentType } = params;
+
+  validateKey(key);
+
+  const command = new PutObjectCommand({
+    Bucket: bucket,
+    Key: key,
+    ContentType: contentType,
+    CacheControl: "public, max-age=31536000, immutable",
+  });
+
+  const uploadUrl = await getSignedUrl(s3, command, {
+    expiresIn: 300,
+  });
+
+  return {
+    key,
+    uploadUrl,
+    publicUrl: getPublicUrl(key),
+    headers: {
+      "Content-Type": contentType,
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
   };
 }
 

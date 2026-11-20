@@ -1,6 +1,7 @@
+
 import { prisma } from "@/lib/prisma";
 import { getOrCreateAnonymousUser } from "@/lib/userToken";
-import { uploadToNeonStorage } from "@/lib/neonStorage";
+import { getPublicUrl } from "@/lib/neonStorage";
 
 export async function GET() {
   try {
@@ -16,70 +17,96 @@ export async function GET() {
         commentsCount: true,
         likesCount: true,
         dislikesCount: true,
-      }
+      },
     });
-    return Response.json(threads, {status: 200});
+
+    return Response.json(threads, { status: 200 });
   } catch (err) {
-    return Response.json({err, error: "Failed to fetch threads" }, { status: 500 });
+    console.error("Failed to fetch threads:", err);
+
+    return Response.json(
+      { error: "Failed to fetch threads" },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
     const user = await getOrCreateAnonymousUser();
+    const body = await request.json();
 
-    const formData = await request.formData();
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const file = formData.get("file") as File | null;
+    const title =
+      typeof body.title === "string" ? body.title.trim() : "";
+
+    const description =
+      typeof body.description === "string"
+        ? body.description.trim()
+        : "";
+
+    const mediaKey =
+      typeof body.mediaKey === "string" ? body.mediaKey : null;
+
+    const mediaType = body.mediaType;
 
     if (!title || !description) {
       return Response.json(
-        { error: "Title, description, and authorToken are required " },
+        { error: "Title and description are required" },
         { status: 400 },
       );
     }
 
     let mediaUrl: string | null = null;
-    let mediaType: string | null = null;
-    let messageFile = ""
+    let validatedMediaType: string | null = null;
 
-    if (file && file.size > 0) {
-      const ext = file.name.split(".").pop()?.toLowerCase();
-      const mime = file.type;
+    if (mediaKey !== null) {
+      const allowedPrefix = `uploads/${user.id}/`;
 
-      const isImage =
-        ["png", "jpg", "jpeg"].includes(ext || "") && mime.startsWith("image/");
-      const isVideo =
-        ["mp4", "webm"].includes(ext || "") && mime.startsWith("video/");
+      if (!mediaKey.startsWith(allowedPrefix)) {
+        return Response.json(
+          { error: "Invalid media ownership" },
+          { status: 403 },
+        );
+      }
+
+      const extension = mediaKey.split(".").pop()?.toLowerCase();
+
+      const isImage = ["png", "jpg", "jpeg"].includes(extension || "");
+      const isVideo = ["mp4", "webm"].includes(extension || "");
 
       if (!isImage && !isVideo) {
         return Response.json(
-          { error: "Only png, jpg, jpeg, mp4, webm allowed" },
+          { error: "Unsupported media format" },
           { status: 400 },
         );
       }
 
-      mediaType = isImage ? "IMAGE" : "VIDEO";
+      const expectedMediaType = isImage ? "IMAGE" : "VIDEO";
 
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
+      if (mediaType !== expectedMediaType) {
+        return Response.json(
+          { error: "Invalid media type" },
+          { status: 400 },
+        );
+      }
 
-      const fileName = `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, "_")}`;
-      const storageKey = `uploads/${fileName}`;
-
-      const uploadResult = await uploadToNeonStorage({
-        key: storageKey,
-        body: buffer,
-        contentType: mime,
-      });
-
-      mediaUrl = uploadResult.url;
-      messageFile = " and the image or video success upload";
+      mediaUrl = getPublicUrl(mediaKey);
+      validatedMediaType = expectedMediaType;
+    } else if (mediaType !== null) {
+      return Response.json(
+        { error: "Media key is required" },
+        { status: 400 },
+      );
     }
 
     const newThread = await prisma.thread.create({
-      data: { title, description, anonymousUserId: user.id, mediaUrl, mediaType },
+      data: {
+        title,
+        description,
+        anonymousUserId: user.id,
+        mediaUrl,
+        mediaType: validatedMediaType,
+      },
       select: {
         id: true,
         title: true,
@@ -90,12 +117,22 @@ export async function POST(request: Request) {
         commentsCount: true,
         likesCount: true,
         dislikesCount: true,
-      }
+      },
     });
 
-    return Response.json({ ...newThread, message: `Thread success create${messageFile}` }, { status: 201 });
+    return Response.json(
+      {
+        ...newThread,
+        message: "Thread successfully created",
+      },
+      { status: 201 },
+    );
   } catch (err) {
-    return Response.json({err, error: "Failed create thread" }, { status: 500 });
+    console.error("Failed to create thread:", err);
+
+    return Response.json(
+      { error: "Failed to create thread" },
+      { status: 500 },
+    );
   }
 }
-

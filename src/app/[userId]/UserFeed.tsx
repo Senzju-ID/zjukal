@@ -5,6 +5,7 @@ import CardThread from '@/components/ui/CardThread';
 import EditThreadModal from '@/components/ui/EditThread';
 import { fetchUserThreads, fetchMe } from '@/lib/api';
 import { Loader2 } from 'lucide-react';
+import CreateThread from '@/components/ui/CreateThread';
 
 interface Thread {
   id: number;
@@ -21,6 +22,7 @@ interface Thread {
 export default function UserFeed({ userId }: { userId: string }) {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState('');
   const [isOwner, setIsOwner] = useState(false);
   const [editingThread, setEditingThread] = useState<Thread | null>(null);
@@ -110,6 +112,11 @@ export default function UserFeed({ userId }: { userId: string }) {
         isOpen={!!editingThread}
         thread={editingThread}
         onClose={() => setEditingThread(null)}
+      />
+
+      <CreateThread 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
       />
     </>
   );
